@@ -4,9 +4,11 @@ import java.io.PrintWriter;
 
 public class Collaborative {
 	public static void main(String[] args) {
+		// Map that holds all movies in the database.
 		Map<Integer, Movie> movies = new HashMap<Integer, Movie>();
-		Set<Rating> trainRatings = new HashSet<Rating>();
-		Set<Rating> testRatings = new HashSet<Rating>();
+		// Maps that maps a user id to a subset of ratings given by that user.
+		Map<Integer, Set<Rating>> trainRatings = new HashMap<Integer, Set<Rating>>();
+		Map<Integer, Set<Rating>> testRatings = new HashMap<Integer, Set<Rating>>();
 
 		// Parse the data from the files in ./DataSet directory
 		try {
@@ -28,10 +30,10 @@ public class Collaborative {
 	/**
 	* Parses a file containing ratings for movies.
 	*
-	* @param ratings Reference to the set to place Ratings we create into.
+	* @param ratings Reference to the map to place Ratings we create into.
 	* @param fileName File path to the file containing the ratings to parse.
 	*/
-	public static void parseRatings(Set<Rating> ratings, String fileName) {
+	public static void parseRatings(Map<Integer, Set<Rating>> ratings, String fileName) {
 		try {
 			Scanner sc = new Scanner(new File(fileName));
 			while (sc.hasNextLine()) {
@@ -39,10 +41,26 @@ public class Collaborative {
 				int mid = Integer.parseInt(tokens[0]);
 				int uid = Integer.parseInt(tokens[1]);
 				double rating = Double.parseDouble(tokens[2]);
-				ratings.add(new Rating(mid, uid, rating));
+
+				if (!ratings.containsKey(uid)) {
+					ratings.put(uid, new HashSet<Rating>());
+				}
+				ratings.get(uid).add(new Rating(mid, uid, rating));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public double calculateWeightedSum() {
+		return 0;
+	}
+
+	public double calculateMean() {
+		return 0;
+	}
+
+	public double calculateWeight() {
+		return 0;
 	}
 }
