@@ -7,8 +7,8 @@ public class Collaborative {
 		// Map that holds all movies in the database.
 		Map<Integer, Movie> movies = new HashMap<Integer, Movie>();
 		// Maps that maps a user id to a subset of ratings given by that user.
-		Map<Integer, Set<Rating>> trainRatings = new HashMap<Integer, Set<Rating>>();
-		Map<Integer, Set<Rating>> testRatings = new HashMap<Integer, Set<Rating>>();
+		Map<Integer, Map<Integer, Rating>> trainRatings = new HashMap<Integer, Map<Integer, Rating>>();
+		Map<Integer, Map<Integer, Rating>> testRatings = new HashMap<Integer, Map<Integer, Rating>>();
 
 		// Parse the data from the files in ./DataSet directory
 		try {
@@ -33,7 +33,7 @@ public class Collaborative {
 	* @param ratings Reference to the map to place Ratings we create into.
 	* @param fileName File path to the file containing the ratings to parse.
 	*/
-	public static void parseRatings(Map<Integer, Set<Rating>> ratings, String fileName) {
+	public static void parseRatings(Map<Integer, Map<Integer, Rating>> ratings, String fileName) {
 		try {
 			Scanner sc = new Scanner(new File(fileName));
 			while (sc.hasNextLine()) {
@@ -43,17 +43,23 @@ public class Collaborative {
 				double rating = Double.parseDouble(tokens[2]);
 
 				if (!ratings.containsKey(uid)) {
-					ratings.put(uid, new HashSet<Rating>());
+					ratings.put(uid, new HashMap<Integer, Rating>());
 				}
-				ratings.get(uid).add(new Rating(mid, uid, rating));
+				ratings.get(uid).put(mid, new Rating(mid, uid, rating));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public double calculateWeightedSum() {
-		return 0;
+	public double calculateWeightedSum(Map<Integer, Map<Integer, Rating>> train, Set<Rating> test, int mid, int k) {
+		double meanTest = calculateMean(test);
+		double sum = 0;
+		for (Integer uid : train.keySet()) {
+			Set<Rating> ratings = new HashSet<Rating>(train.get(uid).values());
+			sum += calculateWeight(ratings, test) * (train.get(uid).get(mid) - calculateMean(ratings));
+		}
+		return meanTest + k * sum;
 	}
 
 	/**
@@ -70,7 +76,22 @@ public class Collaborative {
 		return sum / ratings.size();
 	}
 
-	public double calculateWeight() {
-		return 0;
+	public double calculateWeight(Set<Rating> train, Set<Rating> test) {
+		// Set<Rating> sh
+		
+		double numSum = 0;
+		// Sum top half somehow
+
+		double denSum = 0;
+		
+	}
+
+	private boolean containsMovie(int mid, Set<Rating> ratings) {
+		for (Rating r : ratings) {
+			if (r.getMovieId() == mid) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
