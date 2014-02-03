@@ -56,8 +56,18 @@ public class Collaborative {
 		return 0;
 	}
 
-	public double calculateMean() {
-		return 0;
+	/**
+	* Computes the mean rating that a user has given to movies.
+	*
+	* @param ratings Set of ratings for a particular user.
+	* @return Returns a double indicating the average rating.
+	*/
+	public double calculateMean(Set<Rating> ratings) {
+		double sum = 0;
+		for (Rating r : ratings) {
+			sum += r.getRating();
+		}
+		return sum / ratings.size();
 	}
 
 	public double calculateWeight() {
