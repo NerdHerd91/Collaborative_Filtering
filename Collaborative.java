@@ -25,6 +25,22 @@ public class Collaborative {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		int k = 1;
+		int matches = 0;
+		// Predict ratings for users.
+		for (Integer uid : testRatings.keySet()) {
+			for (Integer mid : testRatings.get(uid).keySet()) {
+				Rating r = testRatings.get(uid).get(mid);
+				double pred = calculateWeightedSum(trainRatings, new HashSet<Rating>(trainRatings.get(uid).values()), mid, k);
+				if (r.getRating() == pred) {
+					matches++;
+				}
+			}
+		}
+
+		// Compute accuracy of algorithm.
+		System.out.println("Matches: " + matches);
 	}
 
 	/**
@@ -61,7 +77,7 @@ public class Collaborative {
 	* @param k Integer normalization factor.
 	* @return Double indicated weighted sum.
 	*/
-	public double calculateWeightedSum(Map<Integer, Map<Integer, Rating>> train, Set<Rating> test, int mid, int k) {
+	public static double calculateWeightedSum(Map<Integer, Map<Integer, Rating>> train, Set<Rating> test, int mid, int k) {
 		double meanTest = calculateMean(test);
 		double sum = 0;
 		for (Integer uid : train.keySet()) {
@@ -80,7 +96,7 @@ public class Collaborative {
 	* @param test Set of Ratings for a particular active user.
 	* @return Returns a Double representing the computed weight.
 	*/
-	public double calculateWeight(Map<Integer, Rating> train, Set<Rating> test) {
+	public static double calculateWeight(Map<Integer, Rating> train, Set<Rating> test) {
 		double numSum = 0;
 		double denTestSum = 0;
 		double denTrainSum = 0;
@@ -103,7 +119,7 @@ public class Collaborative {
 	* @param ratings Set of ratings for a particular user.
 	* @return Returns a double indicating the average rating.
 	*/
-	public double calculateMean(Set<Rating> ratings) {
+	public static double calculateMean(Set<Rating> ratings) {
 		double sum = 0;
 		for (Rating r : ratings) {
 			sum += r.getRating();
@@ -118,7 +134,7 @@ public class Collaborative {
 	* @param ratings Set of ratings for a particular user.
 	* @return Boolean indicating if movie was found in the set.
 	*/
-	private boolean containsMovie(int mid, Set<Rating> ratings) {
+	private static boolean containsMovie(int mid, Set<Rating> ratings) {
 		for (Rating r : ratings) {
 			if (r.getMovieId() == mid) {
 				return true;
