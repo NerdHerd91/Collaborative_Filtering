@@ -66,21 +66,35 @@ public class Collaborative {
 		double sum = 0;
 		for (Integer uid : train.keySet()) {
 			Set<Rating> ratings = new HashSet<Rating>(train.get(uid).values());
-			if (containsMovie(mid, ratings)) {
-				sum += calculateWeight(ratings, test) * (train.get(uid).get(mid) - calculateMean(ratings));
+			if (train.get(uid).containsKey(mid)) {
+				sum += calculateWeight(train.get(uid), test) * (train.get(uid).get(mid) - calculateMean(ratings));
 			}
 		}
 		return meanTest + k * sum;
 	}
 
-	public double calculateWeight(Set<Rating> train, Set<Rating> test) {
-		// Set<Rating> sh
-		
+	/**
+	* Calculates the weight for two users over all items they share recorded ratings for.
+	*
+	* @param train Map from mid to Rating for a particular user (i).
+	* @param test Set of Ratings for a particular active user.
+	* @return Returns a Double representing the computed weight.
+	*/
+	public double calculateWeight(Map<Integer, Rating> train, Set<Rating> test) {
 		double numSum = 0;
-		// Sum top half somehow
+		double denTestSum = 0;
+		double denTrainSum = 0;
+		meanTest = calculateMean(test);
+		meanTrain = calculateMean(new HashSet<Rating>(train.values()));
 
-		double denSum = 0;
-		
+		for (Rating r : test) {
+			if (train.containsKey(r.getMovieId())) {
+				numSum += (r.getRating() - meanTest) * (train.get(r.getMovieId()).getRating() - meanTrain);
+				denTestSum += Math.pow((r.getRating() - meanTest), 2);
+				denTrainSum += Math.pow((train.ge(r.getMovieId()).getRating() - meanTrain), 2);
+			}
+		}
+		return numSum / Math.sqrt(denTestSum * denTrainSum);
 	}
 
 	/**
