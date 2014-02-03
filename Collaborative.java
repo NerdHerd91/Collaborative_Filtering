@@ -67,7 +67,7 @@ public class Collaborative {
 		for (Integer uid : train.keySet()) {
 			Set<Rating> ratings = new HashSet<Rating>(train.get(uid).values());
 			if (train.get(uid).containsKey(mid)) {
-				sum += calculateWeight(train.get(uid), test) * (train.get(uid).get(mid) - calculateMean(ratings));
+				sum += calculateWeight(train.get(uid), test) * (train.get(uid).get(mid).getRating() - calculateMean(ratings));
 			}
 		}
 		return meanTest + k * sum;
@@ -84,14 +84,14 @@ public class Collaborative {
 		double numSum = 0;
 		double denTestSum = 0;
 		double denTrainSum = 0;
-		meanTest = calculateMean(test);
-		meanTrain = calculateMean(new HashSet<Rating>(train.values()));
+		double meanTest = calculateMean(test);
+		double meanTrain = calculateMean(new HashSet<Rating>(train.values()));
 
 		for (Rating r : test) {
 			if (train.containsKey(r.getMovieId())) {
 				numSum += (r.getRating() - meanTest) * (train.get(r.getMovieId()).getRating() - meanTrain);
 				denTestSum += Math.pow((r.getRating() - meanTest), 2);
-				denTrainSum += Math.pow((train.ge(r.getMovieId()).getRating() - meanTrain), 2);
+				denTrainSum += Math.pow((train.get(r.getMovieId()).getRating() - meanTrain), 2);
 			}
 		}
 		return numSum / Math.sqrt(denTestSum * denTrainSum);
