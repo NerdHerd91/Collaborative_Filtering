@@ -51,15 +51,36 @@ public class Collaborative {
 			e.printStackTrace();
 		}
 	}
-
+	
+	/**
+	* Computes the weighted sum for a particular user on a particular item.
+	*
+	* @param train Map from userId to Map of ratings for that user.
+	* @param test Set of ratings for the active user.
+	* @param mid Integer movie id.
+	* @param k Integer normalization factor.
+	* @return Double indicated weighted sum.
+	*/
 	public double calculateWeightedSum(Map<Integer, Map<Integer, Rating>> train, Set<Rating> test, int mid, int k) {
 		double meanTest = calculateMean(test);
 		double sum = 0;
 		for (Integer uid : train.keySet()) {
 			Set<Rating> ratings = new HashSet<Rating>(train.get(uid).values());
-			sum += calculateWeight(ratings, test) * (train.get(uid).get(mid) - calculateMean(ratings));
+			if (containsMovie(mid, ratings)) {
+				sum += calculateWeight(ratings, test) * (train.get(uid).get(mid) - calculateMean(ratings));
+			}
 		}
 		return meanTest + k * sum;
+	}
+
+	public double calculateWeight(Set<Rating> train, Set<Rating> test) {
+		// Set<Rating> sh
+		
+		double numSum = 0;
+		// Sum top half somehow
+
+		double denSum = 0;
+		
 	}
 
 	/**
@@ -76,16 +97,13 @@ public class Collaborative {
 		return sum / ratings.size();
 	}
 
-	public double calculateWeight(Set<Rating> train, Set<Rating> test) {
-		// Set<Rating> sh
-		
-		double numSum = 0;
-		// Sum top half somehow
-
-		double denSum = 0;
-		
-	}
-
+	/**
+	* Determines if a set of ratings contains a certain movie.
+	*
+	* @param mid Integer movie id.
+	* @param ratings Set of ratings for a particular user.
+	* @return Boolean indicating if movie was found in the set.
+	*/
 	private boolean containsMovie(int mid, Set<Rating> ratings) {
 		for (Rating r : ratings) {
 			if (r.getMovieId() == mid) {
