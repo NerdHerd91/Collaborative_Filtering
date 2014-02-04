@@ -28,6 +28,7 @@ public class Collaborative {
 				Rating r = testRatings.get(uid).getRatings().get(mid);
 				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid, k));
 				total++;
+				if (total % 4000 == 0) { System.out.println(); }
 			}
 		}
 		System.out.println("3. Predictions Completed");
@@ -102,7 +103,7 @@ public class Collaborative {
 				denTrainSum += Math.pow(ratings.get(r.getMovieId()).getRating() - train.getMean(), 2);
 			}
 		}
-		return numSum / Math.sqrt(denTestSum * denTrainSum);
+		return (denTestSum * denTrainSum == 0) ? 0 : numSum / Math.sqrt(denTestSum * denTrainSum);
 	}
 
 	/**
