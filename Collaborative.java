@@ -3,6 +3,8 @@ import java.io.File;
 import java.io.PrintWriter;
 
 public class Collaborative {
+	public static final int NORMALIZING_FACTOR = 1;
+
 	public static void main(String[] args) {
 		// Maps that maps a user id to a subset of ratings given by that user.
 		Map<Integer, User> trainRatings = new HashMap<Integer, User>();
@@ -26,7 +28,7 @@ public class Collaborative {
 		for (Integer uid : testRatings.keySet()) {
 			for (Integer mid : testRatings.get(uid).getRatings().keySet()) {
 				Rating r = testRatings.get(uid).getRatings().get(mid);
-				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid, k));
+				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid));
 				total++;
 				if (total % 4000 == 0) { System.out.println(); }
 			}
@@ -68,10 +70,9 @@ public class Collaborative {
 	* @param train Map from userId to User.
 	* @param test User object for active user.
 	* @param mid Integer movie id.
-	* @param k Integer normalization factor.
 	* @return Double indicated weighted sum.
 	*/
-	public static double calculateWeightedSum(Map<Integer, User> train, User test, int mid, int k) {
+	public static double calculateWeightedSum(Map<Integer, User> train, User test, int mid) {
 		double sum = 0;
 		for (Integer uid : train.keySet()) {
 			User user = train.get(uid);
@@ -80,7 +81,7 @@ public class Collaborative {
 				sum += calculateWeight(user, test) * (ratings.get(mid).getRating() - user.getMean());
 			}
 		}
-		return test.getMean() + k * sum;
+		return test.getMean() + NORMALIZING_FACTOR * sum;
 	}
 
 	/**
