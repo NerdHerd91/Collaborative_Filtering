@@ -21,10 +21,9 @@ public class Collaborative {
 		}
 		System.out.println("2. Means Calculated");
 
-		int k = 1;
+		// Predict ratings for users.
 		int total = 0;
 		double errorSum = 0;
-		// Predict ratings for users.
 		for (Integer uid : testRatings.keySet()) {
 			for (Integer mid : testRatings.get(uid).getRatings().keySet()) {
 				Rating r = testRatings.get(uid).getRatings().get(mid);
