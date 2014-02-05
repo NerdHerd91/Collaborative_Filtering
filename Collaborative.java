@@ -11,28 +11,35 @@ public class Collaborative {
 		Map<Integer, User> testRatings = new HashMap<Integer, User>();
 
 		// Parse training and test data into maps.
+		System.out.println("1. Parsing DataSets");
 		parseRatings(trainRatings, "./DataSet/TrainingRatings.txt");
 		parseRatings(testRatings, "./DataSet/TestingRatings.txt");
-		System.out.println("1. Parsing Completed");
 
 		// Fill Map of means.
+		System.out.println("2. Calculating Mean Values");
 		for (Integer uid : trainRatings.keySet()) {
 			trainRatings.get(uid).setMean(calculateMean(trainRatings.get(uid).getRatings()));
 		}
-		System.out.println("2. Means Calculated");
 
 		// Predict ratings for users.
+		System.out.println("3. Predicting Ratings");
 		int total = 0;
 		double errorSum = 0;
 		for (Integer uid : testRatings.keySet()) {
+			// Pre-Compute Weights for each active user
+			Map<Integer, Double> weights = new HashMap<Integer, Double>();
+			for (Integer uid2 : trainRatings.keySet()) {
+				weights.put(uid2, calculateWeight(trainRatings.get(uid2), trainRatings.get(uid)));
+			}
+
+			// Predict movie ratings and determine error summation
 			for (Integer mid : testRatings.get(uid).getRatings().keySet()) {
 				Rating r = testRatings.get(uid).getRatings().get(mid);
-				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid));
+				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid, weights));
 				total++;
-				if (total % 4000 == 0) { System.out.println(); }
+				if (total % 4000 == 0) { System.out.println("Total: " + total); }
 			}
 		}
-		System.out.println("3. Predictions Completed");
 
 		// Compute accuracy of algorithm.
 		System.out.printf("Percent Error: %.2f%%\n", (errorSum / total * 100));
@@ -69,18 +76,21 @@ public class Collaborative {
 	* @param train Map from userId to User.
 	* @param test User object for active user.
 	* @param mid Integer movie id.
+	* @param weights Map from uid to weight between uid and the active user.
 	* @return Double indicated weighted sum.
 	*/
-	public static double calculateWeightedSum(Map<Integer, User> train, User test, int mid) {
+	public static double calculateWeightedSum(Map<Integer, User> train, User test, int mid, Map<Integer, Double> weights) {
 		double sum = 0;
+		double sumK = 0;
 		for (Integer uid : train.keySet()) {
 			User user = train.get(uid);
 			Map<Integer, Rating> ratings = user.getRatings();
 			if (ratings.containsKey(mid)) {
-				sum += calculateWeight(user, test) * (ratings.get(mid).getRating() - user.getMean());
+				sum += weights.get(uid) * (ratings.get(mid).getRating() - user.getMean());
+				sumK += Math.abs(weights.get(uid)); 
 			}
 		}
-		return test.getMean() + NORMALIZING_FACTOR * sum;
+		return test.getMean() + (1 / sumK) * sum;
 	}
 
 	/**
@@ -103,7 +113,7 @@ public class Collaborative {
 				denTrainSum += Math.pow(ratings.get(r.getMovieId()).getRating() - train.getMean(), 2);
 			}
 		}
-		return (denTestSum * denTrainSum == 0) ? 0 : numSum / Math.sqrt(denTestSum * denTrainSum);
+		return (denTestSum == 0 || denTrainSum == 0) ? 0 : numSum / Math.sqrt(denTestSum * denTrainSum);
 	}
 
 	/**
