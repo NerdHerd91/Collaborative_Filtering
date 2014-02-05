@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.PrintWriter;
 
 public class Collaborative {
-	public static final int NORMALIZING_FACTOR = 1;
 
 	public static void main(String[] args) {
 		// Maps that maps a user id to a subset of ratings given by that user.
