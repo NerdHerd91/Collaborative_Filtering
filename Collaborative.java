@@ -25,22 +25,18 @@ public class Collaborative {
 		int total = 0;
 		double errorSum = 0;
 		for (Integer uid : testRatings.keySet()) {
-			// Pre-Compute Weights for each active user
-			Map<Integer, Double> weights = new HashMap<Integer, Double>();
-			for (Integer uid2 : trainRatings.keySet()) {
-				weights.put(uid2, calculateWeight(trainRatings.get(uid2), trainRatings.get(uid)));
-			}
-
 			// Predict movie ratings and determine error summation
 			for (Integer mid : testRatings.get(uid).getRatings().keySet()) {
 				Rating r = testRatings.get(uid).getRatings().get(mid);
-				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid, weights));
+				errorSum += Math.abs(r.getRating() - calculateWeightedSum(trainRatings, trainRatings.get(uid), mid));
 				total++;
-				if (total % 4000 == 0) { System.out.println("Total: " + total); }
+				if (total % 10000 == 0) { System.out.println("Total: " + total); }
 			}
 		}
 
 		// Compute accuracy of algorithm.
+		System.out.println("Error Sum: " + errorSum);
+		System.out.println("Total: " + total);
 		System.out.printf("Percent Error: %.2f%%\n", (errorSum / total * 100));
 	}
 
@@ -75,21 +71,21 @@ public class Collaborative {
 	* @param train Map from userId to User.
 	* @param test User object for active user.
 	* @param mid Integer movie id.
-	* @param weights Map from uid to weight between uid and the active user.
 	* @return Double indicated weighted sum.
 	*/
-	public static double calculateWeightedSum(Map<Integer, User> train, User test, int mid, Map<Integer, Double> weights) {
+	public static double calculateWeightedSum(Map<Integer, User> train, User test, int mid) {
 		double sum = 0;
 		double sumK = 0;
 		for (Integer uid : train.keySet()) {
 			User user = train.get(uid);
 			Map<Integer, Rating> ratings = user.getRatings();
 			if (ratings.containsKey(mid)) {
-				sum += weights.get(uid) * (ratings.get(mid).getRating() - user.getMean());
-				sumK += Math.abs(weights.get(uid)); 
+				double weight = calculateWeight(user, test);
+				sum += weight * (ratings.get(mid).getRating() - user.getMean());
+				sumK += Math.abs(weight); 
 			}
 		}
-		return test.getMean() + (1 / sumK) * sum;
+		return (sumK == 0) ? test.getMean() : test.getMean() + (1 / sumK) * sum;
 	}
 
 	/**
